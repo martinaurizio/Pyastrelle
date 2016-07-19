@@ -2,8 +2,10 @@
 datiMirto e' uno script che permette di generare delle piastrelle trasparenti
 insieme alle piastrelle con i dati
 '''
-from Pyastrellatore import coordinate, zoomIndices
+from pyastrellatore import coordinate, zoomIndices
 from mpl_toolkits.basemap import Basemap, cm
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -34,8 +36,9 @@ def salvaTrasparente(output_path):
     '''
     with open(output_path, "wb") as f:
         f.write(imTr.read())
+	
 
-def generaDatiMirto(z, x, y):
+def generaDatiMirto(z, x, y, risoluzione='l'):
     '''
     '''
     fg=Dataset("fg_complete.nc",'r')
@@ -46,15 +49,15 @@ def generaDatiMirto(z, x, y):
     fg.close()
     
     fig=plt.figure(figsize=(8,8))
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.axis('off')
-    
+ 
     lat0, lon0, lat1, lon1 = coordinate(z, x ,y)
 
     imMirto = Basemap(projection='cyl', llcrnrlat=lat0, urcrnrlat=lat1, 
                       llcrnrlon=lon0, urcrnrlon=lon1, resolution='c')
     
-    imMirto.drawcoastlines(color="none")
+    m.fillcontinents(color='#CD853F', lake_color='#66B2FF')
+    m.drawmapboundary(fill_color='#66B2FF', color='none')
+    m.drawcoastlines()
     
     jet=plt.cm.get_cmap('jet')
     x, y = imMirto(lon, lat)
@@ -65,10 +68,11 @@ def generaDatiMirto(z, x, y):
     fig.savefig(map_io, facecolor="none", format="png")#salvo la figura nella zona appena generata
     map_io.seek(0)
     
-    #figC=crop(fig)
-    #figR=resize(figC)
+    figC=crop(fig)
+    figR=resize(figC)
     
     return(figR)
+
 
 def resize(imP):
     '''
@@ -88,20 +92,16 @@ def crop(mappa):
     mappa_io.seek(0)
     im = Image.open(mappa_io)#riapro la figura come immagine
     
-    im = im.crop((100, 245, 554, 554))
+    #im = im.crop((100, 245, 554, 554))
   
     return(im)
-
-def controlloPiastrella(z):
-    return()
-
 
 
 
 #main
 if __name__== '__main__':
     
-    zoom=1
+    zoom=0
     #valori=zoomIndices(zoom)
     #mappa = generaDatiMirto()
     #salvaMirto("/home/lorenzo/Documenti/mappaMondo/mMirto.png")
@@ -118,7 +118,7 @@ if __name__== '__main__':
                 y = p[1]
                 piastrella = generaDatiMirto(z, x, y)
                 
-                piastrella.save(os.path.join(zDir,"{}/{}.png".format(x,y)), facecolor='none')
+                piastrella.savefig(os.path.join(zDir,"{}/{}.png".format(x,y)), facecolor='none')
             
             p=pool.Pool(processes=NPROC)
             p.map(f, zoomIndices(z))
