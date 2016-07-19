@@ -13,10 +13,9 @@ from io import BytesIO
 from PIL import Image
 import numpy as np
 from multiprocessing import pool
-import datiMirto
 
 BASEWIDTH = 256
-OUTPUT_DIR="/home/lorenzo/Documenti/mappaMondo/"
+OUTPUT_DIR="/home/martina/Scrivania/UltimatePyastrellatore"
 NPROC=1
 
 def coordinate(z,x,y):

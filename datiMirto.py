@@ -15,7 +15,7 @@ from netCDF4 import Dataset
 from multiprocessing import pool
 
 BASEWIDTH = 256
-OUTPUT_DIR="/home/lorenzo/Documenti/mappaMondo/"
+OUTPUT_DIR="/home/martina/Scrivania/UltimatePyastrellatore"
 NPROC=1
 
 def generaTrasparente():
@@ -52,7 +52,7 @@ def generaDatiMirto(z, x, y, risoluzione='l'):
  
     lat0, lon0, lat1, lon1 = coordinate(z, x ,y)
 
-    imMirto = Basemap(projection='cyl', llcrnrlat=lat0, urcrnrlat=lat1, 
+    m = Basemap(projection='cyl', llcrnrlat=lat0, urcrnrlat=lat1, 
                       llcrnrlon=lon0, urcrnrlon=lon1, resolution='c')
     
     m.fillcontinents(color='#CD853F', lake_color='#66B2FF')
@@ -60,7 +60,7 @@ def generaDatiMirto(z, x, y, risoluzione='l'):
     m.drawcoastlines()
     
     jet=plt.cm.get_cmap('jet')
-    x, y = imMirto(lon, lat)
+    x, y = m(lon, lat)
     sc=plt.scatter(x,y, c=t, vmin=np.min(t), vmax=np.max(t), cmap=jet, s=20 ,edgecolors='none')
     
     
