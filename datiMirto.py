@@ -1,4 +1,4 @@
-from pyastrellatore import coordinate, zoom_indices, genera_pyastrella, crop, resize
+from pyastrellatore import coordinate, zoom_indices, genera_pyastrella
 import numpy as np
 from io import BytesIO
 from mpl_toolkits.basemap import Basemap, cm
@@ -59,9 +59,11 @@ def genera_dati_mirto(z, x, y):
 	m.drawmapboundary(fill_color='none', color="none")
 	m.drawcoastlines(color="none")
 	'''
-	jet=plt.cm.get_cmap('jet')
-	x, y = figura(lon3, lat3)
-	sc=plt.scatter(x,y, c=t, vmin=np.min(t), vmax=np.max(t), cmap=jet, s=20 ,edgecolors='none')
+	
+	#jet=plt.cm.get_cmap('jet')
+	#x, y = figura(lon3, lat3)
+	#sc=plt.scatter(x,y, c=t, vmin=np.min(t), vmax=np.max(t), cmap=jet, s=20 ,edgecolors='none')
+	
 	'''
 	map_io = BytesIO() #viene riservata una zona di ram per salvare la figura
 	fig.savefig(map_io, facecolor= 'none', format="png") #salva la figura nella zona appena generata
@@ -70,10 +72,12 @@ def genera_dati_mirto(z, x, y):
 	figR= resize(figC)
 	'''
 	
-	figura = crop(figura)
-	figura = resize(figura)
-	plt.show()
-	plt.close()
+	#figura = crop(fig)
+	figura.save("mappa2.png")
+	#figura = resize(figura)
+	#plt.show()
+	
+	#plt.close()
 	
 	return(figR)
 
@@ -129,7 +133,7 @@ def crop(mappa):
 if __name__ == '__main__':
 	zoom = 1
 	
-	genera_dati_mirto(3, 0, 2)
+	genera_dati_mirto(3, 0, 3)
 	
 	'''
 	

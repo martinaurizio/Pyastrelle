@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 from mpl_toolkits.basemap import Basemap, cm
 from multiprocessing import pool
+from netCDF4 import Dataset
 
 BASEWIDTH = 256
 OUTPUT_DIR = "/home/martina/Scrivania/UltimatePyastrellatore"
@@ -98,12 +99,27 @@ def genera_pyastrella(z, x, y, risoluzione='l'):
 	m = Basemap(projection='cyl', llcrnrlat=lat0, urcrnrlat=lat1,
            		llcrnrlon=lon0, urcrnrlon=lon1 , resolution=risoluzione)
 	
-	m.fillcontinents(color='#CD853F',lake_color='#66B2FF')
+	m.fillcontinents(color='#CD853F',lake_color='#66B2FF', zorder=0)
 	m.drawmapboundary(fill_color='#66B2FF',color='None')
 	m.drawcoastlines()
+	
+	
+	
+	
+	fg=Dataset('fg_complete.nc','r')
+	atmc=fg.groups["atmospheric_components"]
+	t=atmc.variables['skT'][:]
+	t-=272.15
+	lat3=fg.variables["Latitude"][:]
+	lon3=fg.variables["Longitude"][:]
+	fg.close()
+	jet=plt.cm.get_cmap('jet')
+	x, y = m(lon3, lat3)
+	sc=plt.scatter(x,y, c=t, vmin=np.min(t), vmax=np.max(t), cmap=jet, s=20 ,edgecolors='none')
+	
 	figura = crop(fig)
 	figura = resize(figura)
-	plt.close()
+	#plt.close()
 	return figura
 
 def zoom_indices(z):
