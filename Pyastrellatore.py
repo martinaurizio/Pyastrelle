@@ -5,6 +5,8 @@ In base al livello di zoom verranno elaborate le varie
 piastrelle 
 '''
 import os
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap, cm
 from io import BytesIO 
@@ -61,7 +63,7 @@ def crop(mappa):
     x1 = x_no_bianco[-1]
     y1 = y_no_bianco[-1]
     
-    print((0,y0,x1,y1))
+    print(x0,y0,x1,x1)
     im = im.crop((y0, x0, y1, x1))
   
     return(im)
@@ -69,7 +71,6 @@ def crop(mappa):
 def resize(mappa):
     '''
     '''
-    
     wpercent = (BASEWIDTH / float(mappa.size[0]))
     hsize = int((float(mappa.size[1]) * float(wpercent)))
     mappa = mappa.resize((BASEWIDTH, hsize), Image.ANTIALIAS)
@@ -116,7 +117,7 @@ def zoomIndices(z):
 #main
 if __name__== '__main__':
         
-        zoom=3
+        zoom=0
         for z in range(0,zoom+1):
             zDir = os.path.join(OUTPUT_DIR,"{}".format(z))
             os.mkdir(zDir)
