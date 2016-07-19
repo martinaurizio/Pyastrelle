@@ -17,7 +17,8 @@ OUTPUT_DIR="/home/lorenzo/Documenti/mappaMondo/"
 NPROC=1
 
 def generaTrasparente():
-    
+    '''
+    '''
     arrayTrasparente= np.zeros((127,256,4), dtype=np.uint8)
     imTrasparente = Image.fromarray(arrayTrasparente)
     
@@ -29,11 +30,14 @@ def generaTrasparente():
 imTr = generaTrasparente()
 
 def salvaTrasparente(output_path):
+    '''
+    '''
     with open(output_path, "wb") as f:
         f.write(imTr.read())
 
 def generaDatiMirto(z, x, y):
-    
+    '''
+    '''
     fg=Dataset("fg_complete.nc",'r')
     t=fg.groups["atmospheric_components"].variables['skT'][:]
     t-=272.15
@@ -61,24 +65,32 @@ def generaDatiMirto(z, x, y):
     fig.savefig(map_io, facecolor="none", format="png")#salvo la figura nella zona appena generata
     map_io.seek(0)
     
-    return(map_io)
-
-
-def salvaMirto(imMr, output_path):
-    with open(output_path, "wb") as f:
-        f.write(imMr.read())
-
+    #figC=crop(fig)
+    #figR=resize(figC)
+    
+    return(figR)
 
 def resize(imP):
-    
+    '''
+    '''
     wpercent = (BASEWIDTH / float(imP.size[0]))
     hsize = int((float(imP.size[1]) * float(wpercent)))
     imP = imP.resize((BASEWIDTH, hsize), Image.ANTIALIAS)
     
     return(imP)
 
-def crop():
-    return()
+def crop(mappa):
+    '''
+    Rimuove il colore bianco esterno alla piastrella
+    '''
+    mappa_io = BytesIO()#viene riservata una zona di RAM per salvare la figura 
+    mappa.savefig(mappa_io)#salvo la figura nella zona appena generata
+    mappa_io.seek(0)
+    im = Image.open(mappa_io)#riapro la figura come immagine
+    
+    im = im.crop((100, 245, 554, 554))
+  
+    return(im)
 
 def controlloPiastrella(z):
     return()
@@ -89,7 +101,7 @@ def controlloPiastrella(z):
 #main
 if __name__== '__main__':
     
-    zoom=2
+    zoom=1
     #valori=zoomIndices(zoom)
     #mappa = generaDatiMirto()
     #salvaMirto("/home/lorenzo/Documenti/mappaMondo/mMirto.png")
@@ -106,16 +118,12 @@ if __name__== '__main__':
                 y = p[1]
                 piastrella = generaDatiMirto(z, x, y)
                 
-                salvaMirto(piastrella, os.path.join(zDir,"{}/{}.png".format(x,y)))
+                piastrella.save(os.path.join(zDir,"{}/{}.png".format(x,y)), facecolor='none')
             
             p=pool.Pool(processes=NPROC)
             p.map(f, zoomIndices(z))
             p.close()     
     
-    #for i in range(0, 2**zoom):
-     #   x=valori[i][0]
-    #    y=valori[i][1]
-       # lat_min, lon_min, lat_max, lon_max = coordinate(zoom, x, y)
     
     
     
