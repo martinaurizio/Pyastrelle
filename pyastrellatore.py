@@ -101,10 +101,10 @@ def genera_pyastrella(z, x, y, risoluzione='l'):
 	m.fillcontinents(color='#CD853F',lake_color='#66B2FF')
 	m.drawmapboundary(fill_color='#66B2FF',color='None')
 	m.drawcoastlines()
-	figura = crop(fig)
-	figura = resize(figura)
-	plt.close()
-	return figura
+	#figura = crop(fig)
+	#figura = resize(figura)
+	#plt.close()
+	return m
 
 def zoom_indices(z):
 	'''
@@ -123,7 +123,7 @@ def zoom_indices(z):
 
 if __name__ == '__main__':
 	#c = coordinate(1, 0, 1)
-	zoom =3
+	zoom =1
 	
 	for z in range (0, zoom+1):
 		zdir = os.path.join(OUTPUT_DIR,"{}".format(z))
