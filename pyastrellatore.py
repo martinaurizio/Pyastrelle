@@ -84,15 +84,13 @@ def resize(mappa):
 	return (mappa)
 	
 	
-def genera_pyastrella(z, x, y, risoluzione='l'):
+def genera_pyastrella(z, x, y, risoluzione='l', pll=20, datiM=False):
 	'''
 	Genera la piastrella per lo zoom z e seguendo le coordinate x e y, utilizzate
 	per la funzione "coordinate". Colora la piastrella e disegna le coste.
 	Richiama quindi la funzione "crop" per eliminare gli spazi bianchi ai bordi
 	della piastrella
 	'''
-	
-	
 	
 	#aggiunti
 	fg=Dataset('fg_complete.nc','r')
@@ -118,13 +116,10 @@ def genera_pyastrella(z, x, y, risoluzione='l'):
 	m.drawcoastlines()
 	
 	
-	#aggiunti
-	jet=plt.cm.get_cmap('jet')
-	x, y = m(lon, lat)
-	sc=plt.scatter(x,y, c=t, vmin=np.min(t), vmax=np.max(t), cmap=jet, s=20 ,edgecolors='none')
-	
-	
-	
+	if datiM == True:
+		jet=plt.cm.get_cmap('jet')
+		x, y = m(lon, lat)
+		sc=plt.scatter(x,y, c=t, vmin=np.min(t), vmax=np.max(t), cmap=jet, s=pll ,edgecolors='none')
 	
 	figura = crop(fig)
 	figura = resize(figura)
@@ -160,7 +155,11 @@ if __name__ == '__main__':
 		def f(p):
 			x = p[0]
 			y = p[1]
-			pyastrella = genera_pyastrella(z, x, y)
+			if z > 3 and z < 7:
+				risoluzione = 'i'
+			elif z > 6:
+				risoluzione = 'h'
+			pyastrella = genera_pyastrella(z, x, y, risoluzione)
 			pyastrella.save(os.path.join(zdir, "{}/{}.png".format(x, y)))	
 		
 		p = pool.Pool(processes = NPROC)
