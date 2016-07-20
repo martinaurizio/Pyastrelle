@@ -11,7 +11,7 @@ from multiprocessing import pool
 import matplotlib.pyplot as plt
 
 BASEWIDTH = 256
-OUTPUT_DIR = "/home/martina/Scrivania/UltimatePyastrellatore/"
+OUTPUT_DIR = "/home/lorenzo/Documenti/Finale/Pyastrelle/"
 NPROC = 1
 
 '''
@@ -21,7 +21,7 @@ presi dalle misurazioni di Mirto.
 '''
 
 def controllo(lat0, lon0, lat1, lon1):
-	fg=Dataset('fg_complete.nc','r')
+	fg=Dataset('../../../fg_complete.nc','r')
 	atmc=fg.groups["atmospheric_components"]
 	t=atmc.variables['skT'][:]
 	t-=272.15
@@ -35,7 +35,7 @@ def controllo(lat0, lon0, lat1, lon1):
 	lat_1= np.max(lat3)
 	lon_0= np.min(lon3)
 	lon_1= np.max(lon3)
-	#print(lat_0, lat_1, lon_0, lon_1)
+	
 	
 	if lat1 < lat_0:
 		verifica = False
@@ -72,117 +72,17 @@ def salva_trasparente(output_path):
 		
 def genera_dati_mirto(z, x, y):
 	
-	fg=Dataset('fg_complete.nc','r')
-	atmc=fg.groups["atmospheric_components"]
-	t=atmc.variables['skT'][:]
-	t-=272.15
-	lat3=fg.variables["Latitude"][:]
-	lon3=fg.variables["Longitude"][:]
-	fg.close()
-
 	fig=plt.figure(figsize=(8,8))
 	
-	figura = genera_pyastrella(z, x, y)
-	'''
-	lat0, lon0, lat1, lon1 = coordinate(z, x, y)
-	
-	m = Basemap(projection='cyl', llcrnrlat=lat0, urcrnrlat=lat1, \
-            llcrnrlon=lon0, urcrnrlon=lon1, \
-            resolution='c')
-	
 
-	m.drawmapboundary(fill_color='none', color="none")
-	m.drawcoastlines(color="none")
-	'''
-	
-	#jet=plt.cm.get_cmap('jet')
-	#x, y = figura(lon3, lat3)
-	#sc=plt.scatter(x,y, c=t, vmin=np.min(t), vmax=np.max(t), cmap=jet, s=20 ,edgecolors='none')
-	
-	'''
-	map_io = BytesIO() #viene riservata una zona di ram per salvare la figura
-	fig.savefig(map_io, facecolor= 'none', format="png") #salva la figura nella zona appena generata
-	map_io.seek(0)
-	figC = crop(fig)
-	figR= resize(figC)
-	'''
-	
-	#figura = crop(fig)
-	#figura.save("mappa2.png")
-	#figura = resize(figura)
-	#plt.show()
-	
-	#plt.close()
-	
 	return(figura)
 
-#imMirto = genera_dati_mirto(z, x, y)
-
-def salva_mirto(output_path):
-	with open(output_path, 'wb') as f:
-		f.write(imMirto.read())
-		
-def resize(imP):
-	'''
-	'''
-	wpercent=(BASEWIDTH/float(imP.size[0]))
-	hsize = int((float(imP.size[1])*float(wpercent)))
-	imP = imP.resize((BASEWIDTH, hsize), Image.ANTIALIAS)
-	return(imP)
-
-
-def crop(mappa):
-	'''
-	rimuove il colore bianco esterno alla piastrella
-	'''
-	map_io = BytesIO() #viene riservata una zona di ram per salvare la figura
-	mappa.savefig(map_io, facecolor="none") #salva la figura nella zona appena generata
-	map_io.seek(0)
-	im = Image.open(map_io) #riapre la figura come immagine
-	
-	
-	im_data_raw = np.array(im.getdata(), dtype=np.uint8)
-	
-	im_data_raw.dtype = np.uint32
-	im_array = im_data_raw.reshape(im.size[0], im.size[1])
-
-	bianco = 255*256**3+255*256**2+255*256+255
-	
-	#x_bianco, y_bianco = np.where(im_array==bianco)
-
-	for aaa in range (0, im_array.shape[0]):
-		for bbb in range(0, im_array.shape[1]):
-			if im_array[aaa][bbb] == bianco:
-				im_array[aaa][bbb] = 0
-				
-	im_array=im_array.flatten()
-	im_array.dtype = np.uint8
-	im_array = im_array.reshape(im.size[0], im.size[1], 4)
-	im=Image.fromarray(im_array.astype('uint8'))
-	
-	im = im.crop((100, 245, 719, 554))
-	
-	return(im)
 
 	
 if __name__ == '__main__':
-	zoom = 8
+	zoom = 1
 	
-	'''
-	
-	valori = zoom_indices(zoom)
-	mappa = trasparente()
-	genera_dati_mirto()
-	salva_mirto("./map.png")
-	'''
-	
-	
-	'''for n in range (0, 2**zoom):
-		x = valori[n][0]
-		y = valori[n][1]
-		lat_min, lon_min, lat_max, lon_max = coordinate(zoom, x, y)'''
-	
-	
+
 	for z in range (0, zoom+1):
 		zDir = os.path.join(OUTPUT_DIR, "{}".format(z))
 		os.mkdir(zDir)
@@ -192,14 +92,20 @@ if __name__ == '__main__':
 			os.mkdir(xDir)
 		
 		def f(p):
+			risoluzione='l'
 			x = p[0]
 			y = p[1]
 			lat0, lon0, lat1, lon1 = coordinate(z, x, y)
 			verifica = controllo(lat0, lon0, lat1, lon1)
-			#print(verifica)
+
 			if verifica == False:
 				salva_trasparente(os.path.join(zDir, "{}/{}.png".format(x, y)))
 			else:
+				 if z > 3 and z < 7:
+                                	risoluzione='i'
+        			elif z >6:
+                                	risoluzione='h'
+
 				piastrella = genera_dati_mirto(z, x, y)
 				piastrella.save(os.path.join(zDir, "{}/{}.png".format(x, y)), facecolor="none")
 
