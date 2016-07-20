@@ -1,25 +1,20 @@
-import matplotlib as mpl
-mpl.use('Agg')
-from pyastrellatore import coordinate, zoom_indices, genera_pyastrella
-import numpy as np
-from io import BytesIO
-from mpl_toolkits.basemap import Basemap, cm
-from PIL import Image
-from netCDF4 import Dataset
-import os
-from multiprocessing import pool
-import matplotlib.pyplot as plt
-
-BASEWIDTH = 256
-OUTPUT_DIR = "/home/lorenzo/Documenti/Finale/Pyastrelle/"
-NPROC = 1
-
-'''
-datiMirto è uno script python che permette di generare delle piastrelle
-trasparenti (senza il profilo dei continenti mondiali) con i dati
-presi dalle misurazioni di Mirto.
-'''
-
+import matplotlib as mpl 
+mpl.use('Agg') 
+from pyastrellatore import coordinate, zoom_indices, genera_pyastrella 
+import numpy as np 
+from io import BytesIO 
+from mpl_toolkits.basemap import Basemap, cm 
+from PIL import Image 
+from netCDF4 import Dataset 
+import os 
+from multiprocessing import pool 
+import matplotlib.pyplot as plt 
+BASEWIDTH = 256 
+OUTPUT_DIR = "/home/lorenzo/Documenti/Finale/Pyastrelle/" 
+NPROC = 1 
+''' datiMirto è uno script python che permette di generare delle piastrelle trasparenti (senza 
+il profilo dei continenti mondiali) con i dati presi dalle misurazioni di 
+Mirto. ''' 
 def controllo(lat0, lon0, lat1, lon1):
 	fg=Dataset('../../../fg_complete.nc','r')
 	atmc=fg.groups["atmospheric_components"]
@@ -48,10 +43,8 @@ def controllo(lat0, lon0, lat1, lon1):
 	
 	if lon1 < lon_0:
 		verifica = False
-
 	return verifica
 			
-
 def trasparente():
 	'''
 	'''
@@ -61,9 +54,7 @@ def trasparente():
 	map_io = BytesIO() #viene riservata una zona di ram per salvare la figura
 	im_trasparente.save(map_io, format="png") #salva la figura nella zona appena generata
 	map_io.seek(0)
-	return map_io
-
-imTrasparente = trasparente()
+	return map_io imTrasparente = trasparente() 
 
 def salva_trasparente(output_path):
 	with open(output_path, 'wb') as f:
@@ -74,15 +65,11 @@ def genera_dati_mirto(z, x, y):
 	
 	fig=plt.figure(figsize=(8,8))
 	
-
 	return(figura)
-
-
 	
 if __name__ == '__main__':
 	zoom = 1
 	
-
 	for z in range (0, zoom+1):
 		zDir = os.path.join(OUTPUT_DIR, "{}".format(z))
 		os.mkdir(zDir)
@@ -97,7 +84,6 @@ if __name__ == '__main__':
 			y = p[1]
 			lat0, lon0, lat1, lon1 = coordinate(z, x, y)
 			verifica = controllo(lat0, lon0, lat1, lon1)
-
 			if verifica == False:
 				salva_trasparente(os.path.join(zDir, "{}/{}.png".format(x, y)))
 			else:
@@ -105,10 +91,8 @@ if __name__ == '__main__':
                                 	risoluzione='i'
         			elif z >6:
                                 	risoluzione='h'
-
 				piastrella = genera_dati_mirto(z, x, y)
 				piastrella.save(os.path.join(zDir, "{}/{}.png".format(x, y)), facecolor="none")
-
 		p = pool.Pool(processes=NPROC)
 		p.map(f, zoom_indices(z))
 		p.close()

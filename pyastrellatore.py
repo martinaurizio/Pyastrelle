@@ -1,25 +1,21 @@
-import matplotlib as mpl
-mpl.use('Agg')
-import os
-from io import BytesIO
+import matplotlib as mpl 
+mpl.use('Agg') 
+import os 
+from io import BytesIO 
 import matplotlib.pyplot as plt 
-from PIL import Image
-import numpy as np
+from PIL import Image 
+import numpy as np 
 from mpl_toolkits.basemap import Basemap, cm 
 from multiprocessing import pool 
-from netCDF4 import Dataset
-
+from netCDF4 import Dataset 
 BASEWIDTH = 256
-OUTPUT_DIR = "/home/lorenzo/Documenti/Finale/Pyastrelle/"
-NPROC = 2
-
-'''
-pyastrellatore e' uno script python che ha lo scopo di produrre
-una sequenza di piastrelle organizzate in cartelle.
-In base al livello di zoom verranno elaborate le varie
-piastrelle ed organizzate nelle rispettive cartelle.
-'''
-
+OUTPUT_DIR = "/home/lorenzo/Documenti/Finale/Pyastrelle/" 
+NPROC = 2 
+''' 
+pyastrellatore e' uno script python che ha lo scopo di produrre una sequenza di 
+piastrelle organizzate in cartelle. In base al livello di zoom verranno 
+elaborate le varie piastrelle ed organizzate nelle rispettive cartelle. 
+''' 
 def coordinate(z, x, y):
 	'''
 	In base al livello di zoom z e alla posizione della piastrella
@@ -38,9 +34,7 @@ def coordinate(z, x, y):
 	lat_max=90-lat*y
 	lat_min=lat_max-lat
 		
-	return (lat_min, lon_min, lat_max, lon_max)
-
-def crop(mappa):
+	return (lat_min, lon_min, lat_max, lon_max) def crop(mappa):
 	'''
 	rimuove il colore bianco esterno alla piastrella generata
 	'''
@@ -53,29 +47,25 @@ def crop(mappa):
 	im_data_raw = np.array(im.getdata(), dtype=np.uint8)
 	#im_data = im_data_raw.reshape(im.size[0], im.size[1], 4)
 	
-	#l'immagine va pensata come un array bidimensionale di numeri a 32 bit
+	#l'immagine va pensata come un array bidimensionale di numeri a 32 
+	#bit
 	im_data_raw.dtype = np.uint32
 	im_array = im_data_raw.reshape(im.size[0], im.size[1])
-
 	bianco = 255*256**3+255*256**2+255*256+255
-
 	x_no_bianco, y_no_bianco = np.where(im_array!=bianco)
 	
 	x0 = x_no_bianco[0]
 	y0 = y_no_bianco[0]
 	x1 = x_no_bianco[-1]
 	y1 = y_no_bianco[-1]
-
 	im = im.crop((y0, x0, y1, x1))
 	
 	return(im)
 	
-
 def resize(mappa):
 	'''
 	Modifica la risoluzione della piastrella
 	'''
-
 	wpercent = (BASEWIDTH / float(mappa.size[0]))
 	hsize = int((float(mappa.size[1]) * float(wpercent)))
 	mappa = mappa.resize((BASEWIDTH, hsize), Image.ANTIALIAS)
@@ -90,7 +80,6 @@ def genera_pyastrella(z, x, y, risoluzione='l', datiM = False, pll = 20):
 	Richiama quindi la funzione "crop" per eliminare gli spazi bianchi ai bordi
 	della piastrella
 	'''
-
 	fg=Dataset('../../../fg_complete.nc','r')
 	t=fg.groups["atmospheric_components"].variables['skT'][:]
 	t-=272.15
@@ -120,9 +109,7 @@ def genera_pyastrella(z, x, y, risoluzione='l', datiM = False, pll = 20):
 	figura = crop(fig)
 	figura = resize(figura)
 	plt.close()
-	return figura
-
-def zoom_indices(z):
+	return figura def zoom_indices(z):
 	'''
 	ritorna una lista di tutti i validi indici x e y delle
 	piastrelle di zoom z da generare
@@ -136,9 +123,7 @@ def zoom_indices(z):
 			
 	return indices
 	
-
 if __name__ == '__main__':
-
 	zoom =1
 	
 	for z in range (0, zoom+1):
@@ -165,7 +150,6 @@ if __name__ == '__main__':
 				ppl=250
 			elif z == 8:
 				ppl=350
-
 			pyastrella = genera_pyastrella(z, x, y, risoluzione)
 			pyastrella.save(os.path.join(zdir, "{}/{}.png".format(x, y)))
 		
