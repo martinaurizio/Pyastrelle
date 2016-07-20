@@ -1,3 +1,5 @@
+import matplotlib as mpl
+mpl.use('Agg')
 from pyastrellatore import coordinate, zoom_indices, genera_pyastrella
 import numpy as np
 from io import BytesIO
@@ -18,6 +20,38 @@ trasparenti (senza il profilo dei continenti mondiali) con i dati
 presi dalle misurazioni di Mirto.
 '''
 
+def controllo(lat0, lon0, lat1, lon1):
+	fg=Dataset('fg_complete.nc','r')
+	atmc=fg.groups["atmospheric_components"]
+	t=atmc.variables['skT'][:]
+	t-=272.15
+	lat3=fg.variables["Latitude"][:]
+	lon3=fg.variables["Longitude"][:]
+	fg.close()
+	
+	verifica = True
+	
+	lat_0= np.min(lat3)
+	lat_1= np.max(lat3)
+	lon_0= np.min(lon3)
+	lon_1= np.max(lon3)
+	#print(lat_0, lat_1, lon_0, lon_1)
+	
+	if lat1 < lat_0:
+		verifica = False
+	
+	if lat0 > lat_1:
+		verifica = False
+	
+	if lon0 > lon_1:
+		verifica = False
+	
+	if lon1 < lon_0:
+		verifica = False
+
+	return verifica
+			
+
 def trasparente():
 	'''
 	'''
@@ -34,6 +68,7 @@ imTrasparente = trasparente()
 def salva_trasparente(output_path):
 	with open(output_path, 'wb') as f:
 		f.write(imTrasparente.read())
+	imTrasparente.seek(0)
 		
 def genera_dati_mirto(z, x, y):
 	
@@ -73,13 +108,13 @@ def genera_dati_mirto(z, x, y):
 	'''
 	
 	#figura = crop(fig)
-	figura.save("mappa2.png")
+	#figura.save("mappa2.png")
 	#figura = resize(figura)
 	#plt.show()
 	
 	#plt.close()
 	
-	return(figR)
+	return(figura)
 
 #imMirto = genera_dati_mirto(z, x, y)
 
@@ -131,9 +166,7 @@ def crop(mappa):
 
 	
 if __name__ == '__main__':
-	zoom = 1
-	
-	genera_dati_mirto(3, 0, 3)
+	zoom = 8
 	
 	'''
 	
@@ -161,9 +194,14 @@ if __name__ == '__main__':
 		def f(p):
 			x = p[0]
 			y = p[1]
-			piastrella = genera_dati_mirto(z, x, y)
-
-			piastrella.save(os.path.join(zDir, "{}/{}.png".format(x, y)), facecolor="none")
+			lat0, lon0, lat1, lon1 = coordinate(z, x, y)
+			verifica = controllo(lat0, lon0, lat1, lon1)
+			#print(verifica)
+			if verifica == False:
+				salva_trasparente(os.path.join(zDir, "{}/{}.png".format(x, y)))
+			else:
+				piastrella = genera_dati_mirto(z, x, y)
+				piastrella.save(os.path.join(zDir, "{}/{}.png".format(x, y)), facecolor="none")
 
 		p = pool.Pool(processes=NPROC)
 		p.map(f, zoom_indices(z))

@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 from mpl_toolkits.basemap import Basemap, cm
 from multiprocessing import pool
+from netCDF4 import Dataset
 
 BASEWIDTH = 256
 OUTPUT_DIR = "/home/martina/Scrivania/UltimatePyastrellatore"
@@ -65,7 +66,7 @@ def crop(mappa):
 	y1 = y_no_bianco[-1]
 
 	im = im.crop((y0, x0, y1, x1))
-	print(y0, x0, y1, x1)
+	#print(y0, x0, y1, x1)
 	#m.save("/home/martina/Scrivania/UltimatePyastrellatore/prova.png")		
 	
 	return(im)
@@ -90,6 +91,20 @@ def genera_pyastrella(z, x, y, risoluzione='l'):
 	Richiama quindi la funzione "crop" per eliminare gli spazi bianchi ai bordi
 	della piastrella
 	'''
+	
+	
+	
+	#aggiunti
+	fg=Dataset('fg_complete.nc','r')
+	atmc=fg.groups["atmospheric_components"]
+	t=atmc.variables['skT'][:]
+	t-=272.15
+	lat=fg.variables["Latitude"][:]
+	lon=fg.variables["Longitude"][:]
+	fg.close()
+	
+	
+	
 	npLato = 2**z
 	lat0, lon0, lat1, lon1 = coordinate(z, x, y)
 	
@@ -98,9 +113,19 @@ def genera_pyastrella(z, x, y, risoluzione='l'):
 	m = Basemap(projection='cyl', llcrnrlat=lat0, urcrnrlat=lat1,
            		llcrnrlon=lon0, urcrnrlon=lon1 , resolution=risoluzione)
 	
-	m.fillcontinents(color='#CD853F',lake_color='#66B2FF')
+	m.fillcontinents(color='#CD853F',lake_color='#66B2FF', zorder=0)
 	m.drawmapboundary(fill_color='#66B2FF',color='None')
 	m.drawcoastlines()
+	
+	
+	#aggiunti
+	jet=plt.cm.get_cmap('jet')
+	x, y = m(lon, lat)
+	sc=plt.scatter(x,y, c=t, vmin=np.min(t), vmax=np.max(t), cmap=jet, s=20 ,edgecolors='none')
+	
+	
+	
+	
 	figura = crop(fig)
 	figura = resize(figura)
 	plt.close()
