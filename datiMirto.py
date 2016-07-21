@@ -15,9 +15,11 @@ OUTPUT_DIR = "/home/martina/Scrivania/UltimatePyastrellatore/"
 NPROC = 1
 
 '''
-datiMirto è uno script python che permette di generare delle piastrelle
-trasparenti (senza il profilo dei continenti mondiali) con i dati
-presi dalle misurazioni di Mirto.
+datiMirto is a Python script which manages the tiles, choosing when
+it creates a new tile with some graphic data or when it saves a 
+transparent tile.
+Those tiles will be applied on the layer of the tiles created by
+the only script pyastrellatore.py
 '''
 
 def controllo(lat0, lon0, lat1, lon1):
@@ -53,8 +55,8 @@ def trasparente():
 	array_trasparente = np.zeros((127, 256, 4), dtype = np.uint8)
 	im_trasparente = Image.fromarray(array_trasparente)
 	
-	map_io = BytesIO() #viene riservata una zona di ram per salvare la figura
-	im_trasparente.save(map_io, format="png") #salva la figura nella zona appena generata
+	map_io = BytesIO() #it is reserved a zone of the RAM to save the figure
+	im_trasparente.save(map_io, format="png") #it saves the figure in the zone just created
 	map_io.seek(0)
 	return map_io
 
@@ -69,6 +71,7 @@ def salva_trasparente(output_path):
 		
 def genera_dati_mirto(z, x, y, risoluzione, pll):
 	'''
+	This function calls the pyastrellatore.py function to create a 
 	'''
 	figura = genera_pyastrella(z, x, y, risoluzione, pll, True)
 	
@@ -95,11 +98,18 @@ if __name__ == '__main__':
 			if verifica == False:
 				salva_trasparente(os.path.join(zDir, "{}/{}.png".format(x, y)))
 			else:
+				'''
+				According to the zoom level z, the resolution of the map 
+				changes from intermediate to high
+				'''
 				if z > 3 and z < 7:
 					risoluzione = 'i'
 				elif z > 6:
 					risoluzione = 'h'
-
+				'''
+				According to the zoom level z, it changes the ray of the 
+				circle for the	graphic data to apply on the map
+				'''
 				if z == 5:
 					pll = 50
 				elif z == 6:
