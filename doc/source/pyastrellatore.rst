@@ -4,7 +4,7 @@ pyastrellatore.py - how to use
 The Python script pyastrellatore.py helps to create some sequences of 
 tiles, ordered and organized in folders, that can be used for Leaflet, a 
 JavaScript library to visualize a geographical map using some tiles.
-This script uses some modules, between which
+This script uses some modules, among all:
 
 - "os"; 
 - "io"; 
@@ -19,7 +19,7 @@ There are three constants to set, according to the user preferences.
 
 - BASEWIDTH is the width of the image base after its resize. The default value is 256; in this way the tiles will be created with a width of 256 pixel and the height of 127 pixel.
 - OUTPUT_DIR is the path of the directory with which will be saved the tiles.
-- NPROC is the number of cores that the user want to use to execute the program.
+- NPROC is the number of cores that the user wants to use to execute the program.
 - ZOOM, with which the user has to specify the number of zoom level he wants to create.
 
 Interestingly, the resolution of the map changes with the zoom level.

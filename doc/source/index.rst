@@ -13,6 +13,7 @@ Contents:
 
    pyastrellatore
    datiMirto
+   map
 
 Indices and tables
 ==================
